@@ -1,5 +1,5 @@
-var NotaryContract = artifacts.require("Notary");
+var smart_contract = artifacts.require("certificate");
 
 module.exports = function(deployer) {
-    deployer.deploy(NotaryContract);
+    deployer.deploy(smart_contract);
 };

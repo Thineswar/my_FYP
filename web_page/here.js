@@ -1,12 +1,15 @@
 /*jshint esversion: 6 */
 var contract = null;
-var address = "0x25bcC9C2d839502695d88AaD3DfCE7942B627d92"; //contract address
+var address = "0xcBB073D67027D1fD2c520CDb731365BC22577FF9"; //contract address
 $(document).ready(function() {
-  abi = [{
+  var abi = [{
+    "constant": false,
     "inputs": [],
+    "name": "Notary",
+    "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "constructor"
+    "type": "function"
   }, {
     "constant": false,
     "inputs": [{
@@ -28,26 +31,28 @@ $(document).ready(function() {
     "outputs": [{
       "name": "",
       "type": "uint256"
+    }, {
+      "name": "",
+      "type": "uint256"
     }],
     "payable": false,
     "stateMutability": "view",
     "type": "function"
   }];
   //creating an instance of the contract
-  const web3 = new Web3("http://localhost:7545")
-  contract = new web3.eth.Contract(abi, address)
+  const web3 = new Web3("http://localhost:7545");
+  contract = new web3.eth.Contract(abi, address);
 });
-//hash input file
-function hashForFile(callback) {
-  input = document.getElementById("file_input");
-  if( document.getElementById("file_input").files.length == 0 ){
-  //if(!input.files[0]) {
+//hash the input file
+function hash_file(callback) {
+  var input = document.getElementById("file_input");
+  if (document.getElementById("file_input").files.length === 0) {
     alert("Please select a file first");
   } else {
-    file = input.files[0];
-    fr = new FileReader();
+    var file = input.files[0];
+    var fr = new FileReader();
     fr.onload = function(e) {
-      content = e.target.result;
+      var content = e.target.result;
       var shaObj = new jsSHA("SHA-256", "ARRAYBUFFER");
       shaObj.update(content);
       var hash = "0x" + shaObj.getHash("HEX");
@@ -55,12 +60,12 @@ function hashForFile(callback) {
     };
     fr.readAsArrayBuffer(file);
   }
-};
+}
 //Upload button is pressed
 document.getElementById("upload_button").addEventListener("click", function() {
-  hashForFile(function(err, hash) {
-    notary_send(hash, function(err, tx) {
-      if(tx != null) {
+  hash_file(function(err, hash) {
+    upload_to_blockchain(hash, function(err, tx) {
+      if (tx !== null) {
         $("#error_message").fadeOut(100, function() {
           $("#valid_message").fadeOut(100, function() {
             $("#upload_message").fadeIn(100, function() {
@@ -82,13 +87,14 @@ document.getElementById("upload_button").addEventListener("click", function() {
 });
 //Find button is pressed
 document.getElementById("find_button").addEventListener("click", function() {
-  hashForFile(function(err, hash) {
-    notary_find(hash, function(err, resultObj) {
-      if(resultObj.blockNumber != null) {
+  hash_file(function(err, hash) {
+    verify(hash, function(err, resultObj) {
+      if (resultObj.blockNumber !== 0) {
         $("#error_message").fadeOut(100, function() {
           $("#upload_message").fadeOut(100, function() {
             $("#valid_message").fadeIn(100, function() {
-              $("#upload_message").html("<strong>Success!</strong> Certificate is valid.");
+              console.log("Hash found at block #" + resultObj.blockNumber);
+              $("#valid_message").html("<strong>Valid!</strong> <br> Certificate was issued on " + resultObj.timestamp);
             });
           });
         });
@@ -105,35 +111,37 @@ document.getElementById("find_button").addEventListener("click", function() {
   });
 });
 //sends the hash to the blockchain
-function notary_send(hash, callback) {
+function upload_to_blockchain(hash, callback) {
   getAccount().then(acc => {
-    if(acc != null) {
+    if (acc !== null) {
       console.log("New file upload: " + hash);
       contract.methods.addDocHash(hash).send({
         from: acc
       }, function(error, tx) {
-        if(error) callback(error, null)
-        else callback(null, tx)
+        if (error) callback(error, null);
+        else callback(null, tx);
       });
     } else {
       alert("Unable to connect to account!");
     }
-  })
+  });
 }
 //looks up the hash on the blockchain
-function notary_find(hash, callback) {
-  if(hash != null) {
+function verify(hash, callback) {
+  if (hash !== null) {
     contract.methods.findDocHash(hash).call(function(error, result) {
-      if(error) callback(error, null);
+      if (error) callback(error, null);
       else {
         let resultObj = {
-          blockNumber: result[0]
+          timestamp: new Date(result[0] * 1000),
+          blockNumber: result[1]
         };
         callback(null, resultObj);
       }
     });
   }
 }
+//Get account in MetaMask
 async function getAccount() {
   const accounts = await ethereum.request({
     method: 'eth_requestAccounts'
