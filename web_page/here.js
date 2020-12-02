@@ -67,20 +67,16 @@ document.getElementById("upload_button").addEventListener("click", function() {
     upload_to_blockchain(hash, function(err, tx) {
       if (tx !== null) {
         $("#error_message").fadeOut(100, function() {
-          $("#valid_message").fadeOut(100, function() {
             $("#upload_message").fadeIn(100, function() {
               $("#upload_message").html("<strong>Success!</strong> Transaction ID: " + tx + ".");
             });
-          });
         });
       } else {
-        $("#valid_message").fadeOut(100, function() {
           $("#upload_message").fadeOut(100, function() {
             $("#error_message").fadeIn(100, function() {
               $("#error_message").html("<strong>Error!</strong> Please try again.");
             });
           });
-        });
       }
     });
   });
@@ -91,21 +87,17 @@ document.getElementById("find_button").addEventListener("click", function() {
     verify(hash, function(err, resultObj) {
       if (resultObj.blockNumber !== 0) {
         $("#error_message").fadeOut(100, function() {
-          $("#upload_message").fadeOut(100, function() {
-            $("#valid_message").fadeIn(100, function() {
-              console.log("Hash found at block #" + resultObj.blockNumber);
-              $("#valid_message").html("<strong>Valid!</strong> <br> Certificate was issued on " + resultObj.timestamp);
-            });
+          $("#upload_message").fadeIn(100, function() {
+            console.log("Hash found at block #" + resultObj.blockNumber);
+            $("#upload_message").html("<strong>Valid!</strong> <br> Certificate was issued on " + resultObj.timestamp);
           });
         });
       } else {
-        $("#valid_message").fadeOut(100, function() {
           $("#upload_message").fadeOut(100, function() {
             $("#error_message").fadeIn(100, function() {
               $("#error_message").html("<strong>Error!</strong> Please try again.");
             });
           });
-        });
       }
     });
   });
