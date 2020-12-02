@@ -16,7 +16,7 @@ Digital Certificate Verification System Utilizing Permissioned Blockchain
 
 **Blockchain network**
 1. In Ganache, click on *New Workspace* (Ethereum).
-1. Under *Chain*, set *Gas Price* to be *0*. Everything else can be left at their default values.
+1. Under *Chain*, set *Gas Price* and *Gas Limit* to be *0*. Everything else can be left at their default values.
 1. Click on *Save Workspace* at the top right.
 1. Copy *Network ID* and *RPC Server*. Usually they are *5777* and *http://127.0.0.1:7545*
 1. Under the *account* tab, copy any account's public address.
