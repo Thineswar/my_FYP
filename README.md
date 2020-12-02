@@ -8,23 +8,23 @@ Digital Certificate Verification System Utilizing Permissioned Blockchain
 1. truffle: `npm install -g truffle`
 
 **Smart contracts**
-1. cd into project folder, then execute this command: `truffle compile`
-1. Navigate to project_folder/build/contracts/certificate.json
+1. cd into project folder, then execute `truffle compile`
+1. Open project_folder/build/contracts/certificate.json
 1. Copy values for *abi*.
-1. Navigate to project_folder/web_page/here.js
+1. Open project_folder/web_page/here.js
 1. Replace *abi* values with what was copied.
 
 **Blockchain network**
 1. In Ganache, click on *New Workspace* (Ethereum).
 1. Under *Chain*, set *Gas Price* and *Gas Limit* to be *0*. Everything else can be left at their default values.
 1. Click on *Save Workspace* at the top right.
-1. Copy *Network ID* and *RPC Server*. Usually they are *5777* and *http://127.0.0.1:7545*
-1. Under the *account* tab, copy any account's public address.
-1. Navigate to project_folder/truffle.js
+1. Copy *Network ID* and *RPC Server*. Usually these values are *5777* and *http://127.0.0.1:7545*
+1. Under the *Account* tab, copy any account's public address.
+1. Open project_folder/truffle.js
 1. Replace values for *host*, *port*, *network ID* and *from* with what was copied.
-1. cd into project folder, and execute this command: `truffle migrate`
+1. cd into project folder, and execute `truffle migrate`
 1. In the output, copy *contract address* for certificate.sol.
-1. Navigate to here.js, and replace value for *address* variable with what was copied.
+1. Open project_folder/web_page/here.js, and replace value for *address* variable (line 3) with what was copied.
 
 **Metamask**
 1. Under *Networks*, click on *Add Network*.
