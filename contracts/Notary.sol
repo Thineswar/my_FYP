@@ -1,9 +1,9 @@
 pragma solidity ^0.4.4;
 
-contract Notary {
+contract certificate {
     struct Record {
-        uint mineTime;
-        uint blockNumber;
+        uint timestamp;
+        uint block_number;
     }
 
     mapping (bytes32 => Record) private docHashes;
@@ -18,6 +18,6 @@ contract Notary {
     }
 
     function findDocHash (bytes32 hash) public constant returns(uint, uint) {
-        return (docHashes[hash].mineTime, docHashes[hash].blockNumber);
+        return (docHashes[hash].timestamp, docHashes[hash].block_number);
     }
 }
