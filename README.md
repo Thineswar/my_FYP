@@ -7,7 +7,7 @@ Digital Certificate Verification System Utilizing Permissioned Blockchain
 1. http-server: `npm install http-server -g`
 1. truffle: `npm install truffle -g`
 
-**Smart contracts**
+**Smart contracts** (if edited)
 1. cd into project folder, then execute `truffle compile`
 1. Open project_folder/build/contracts/certificate.json
 1. Copy values for *abi*.
