@@ -3,9 +3,9 @@ Digital Certificate Verification System Utilizing Permissioned Blockchain
 
 **Pre-requisites**
 1. Ganache GUI (or any valid alternative).
-1. [npm](https://www.npmjs.com/get-npm) (to install truffle).
+1. [npm](https://www.npmjs.com/get-npm) (to install truffle and http-server).
 1. http-server: `npm install http-server -g`
-1. truffle: `npm install -g truffle`
+1. truffle: `npm install truffle -g`
 
 **Smart contracts**
 1. cd into project folder, then execute `truffle compile`
