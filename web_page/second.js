@@ -1,44 +1,52 @@
 /*jshint esversion: 6 */
 var contract = null;
-var address = "0xcBB073D67027D1fD2c520CDb731365BC22577FF9"; //contract address
+var address = "0x6D97310b646F9ADCfcbC4596f5a993857dC6Eb2D"; //contract address
 $(document).ready(function() {
-  var abi = [{
-    "constant": false,
-    "inputs": [],
-    "name": "Notary",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }, {
-    "constant": false,
-    "inputs": [{
-      "name": "hash",
-      "type": "bytes32"
-    }],
-    "name": "addDocHash",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }, {
-    "constant": true,
-    "inputs": [{
-      "name": "hash",
-      "type": "bytes32"
-    }],
-    "name": "findDocHash",
-    "outputs": [{
-      "name": "",
-      "type": "uint256"
-    }, {
-      "name": "",
-      "type": "uint256"
-    }],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  }];
+  var abi = [
+    {
+      "inputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "file_hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "upload",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "file_hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "verify",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ];
   //creating an instance of the contract
   const web3 = new Web3("http://localhost:7545");
   contract = new web3.eth.Contract(abi, address);
@@ -52,10 +60,8 @@ function hash_file(callback) {
     var file = input.files[0];
     var fr = new FileReader();
     fr.onload = function(e) {
-      var content = e.target.result;
-      var shaObj = new jsSHA("SHA-256", "ARRAYBUFFER");
-      shaObj.update(content);
-      var hash = "0x" + shaObj.getHash("HEX");
+      var temp = CryptoJS.lib.WordArray.create(fr.result);
+      var hash = "0x" + CryptoJS.SHA256(temp).toString();
       callback(null, hash);
     };
     fr.readAsArrayBuffer(file);
@@ -67,12 +73,13 @@ document.getElementById("upload_button").addEventListener("click", function() {
     upload_to_blockchain(hash, function(err, tx) {
       if (tx !== null) {
         $("#error_message").fadeOut(100, function() {
-            $("#upload_message").fadeIn(100, function() {
-              $("#upload_message").html("<strong>Success!</strong> Transaction ID: " + tx + ".");
+            $("#success_message").fadeIn(100, function() {
+              console.log("New upload: " + tx + ".");
+              $("#success_message").html("<strong>Success!</strong> Transaction ID: " + tx + ".");
             });
         });
       } else {
-          $("#upload_message").fadeOut(100, function() {
+          $("#success_message").fadeOut(100, function() {
             $("#error_message").fadeIn(100, function() {
               $("#error_message").html("<strong>Error!</strong> Please try again.");
             });
@@ -85,17 +92,17 @@ document.getElementById("upload_button").addEventListener("click", function() {
 document.getElementById("find_button").addEventListener("click", function() {
   hash_file(function(err, hash) {
     verify(hash, function(err, resultObj) {
-      if (resultObj.blockNumber !== 0) {
+      if (resultObj.block_number > 0) {
         $("#error_message").fadeOut(100, function() {
-          $("#upload_message").fadeIn(100, function() {
-            console.log("Hash found at block #" + resultObj.blockNumber);
-            $("#upload_message").html("<strong>Valid!</strong> <br> Certificate was issued on " + resultObj.timestamp);
+          $("#success_message").fadeIn(100, function() {
+            console.log("Hash found at block #" + resultObj.block_number);
+            $("#success_message").html("<strong>Valid!</strong> <br> Certificate was issued on " + resultObj.timestamp);
           });
         });
       } else {
-          $("#upload_message").fadeOut(100, function() {
+          $("#success_message").fadeOut(100, function() {
             $("#error_message").fadeIn(100, function() {
-              $("#error_message").html("<strong>Error!</strong> Please try again.");
+              $("#error_message").html("<strong>Invalid!</strong> Input file cannot be verified.");
             });
           });
       }
@@ -106,7 +113,6 @@ document.getElementById("find_button").addEventListener("click", function() {
 function upload_to_blockchain(hash, callback) {
   getAccount().then(acc => {
     if (acc !== null) {
-      console.log("New file upload: " + hash);
       contract.methods.upload(hash).send({
         from: acc
       }, function(error, tx) {
@@ -126,7 +132,7 @@ function verify(hash, callback) {
       else {
         let resultObj = {
           timestamp: new Date(result[0] * 1000),
-          blockNumber: result[1]
+          block_number: result[1]
         };
         callback(null, resultObj);
       }

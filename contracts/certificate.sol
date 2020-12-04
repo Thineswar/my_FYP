@@ -14,7 +14,7 @@ contract Certificate {
 
     function upload (bytes32 file_hash) public {
         Cert memory new_Cert = Cert(now, block.number);
-        docHashes[file_hash] = newRecord;
+        docHashes[file_hash] = new_Cert;
     }
 
     function verify (bytes32 file_hash) public constant returns(uint, uint) {
