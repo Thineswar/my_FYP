@@ -6,6 +6,7 @@ Digital Certificate Verification System Utilizing Permissioned Blockchain
 1. [npm](https://www.npmjs.com/get-npm) (to install truffle and http-server).
 1. http-server: `npm install http-server -g`
 1. truffle: `npm install truffle -g`
+1. CryptoJS (for hashing input file): `npm install crypto-js -g`
 
 **Smart contracts** (if edited)
 1. cd into project folder, then execute `truffle compile`
