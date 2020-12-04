@@ -107,7 +107,7 @@ function upload_to_blockchain(hash, callback) {
   getAccount().then(acc => {
     if (acc !== null) {
       console.log("New file upload: " + hash);
-      contract.methods.addDocHash(hash).send({
+      contract.methods.upload(hash).send({
         from: acc
       }, function(error, tx) {
         if (error) callback(error, null);
@@ -121,7 +121,7 @@ function upload_to_blockchain(hash, callback) {
 //looks up the hash on the blockchain
 function verify(hash, callback) {
   if (hash !== null) {
-    contract.methods.findDocHash(hash).call(function(error, result) {
+    contract.methods.verify(hash).call(function(error, result) {
       if (error) callback(error, null);
       else {
         let resultObj = {

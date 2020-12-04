@@ -1,23 +1,23 @@
 pragma solidity ^0.4.4;
 
-contract certificate {
-    struct Record {
+contract Certificate {
+    struct Cert {
         uint timestamp;
         uint block_number;
     }
 
-    mapping (bytes32 => Record) private docHashes;
+    mapping (bytes32 => Cert) private docHashes;
 
-    function Notary() public {
+    function Certificate() public {
         // constructor
     }
 
-    function addDocHash (bytes32 hash) public {
-        Record memory newRecord = Record(now, block.number);
-        docHashes[hash] = newRecord;
+    function upload (bytes32 file_hash) public {
+        Cert memory new_Cert = Cert(now, block.number);
+        docHashes[file_hash] = newRecord;
     }
 
-    function findDocHash (bytes32 hash) public constant returns(uint, uint) {
-        return (docHashes[hash].timestamp, docHashes[hash].block_number);
+    function verify (bytes32 file_hash) public constant returns(uint, uint) {
+        return (docHashes[file_hash].timestamp, docHashes[file_hash].block_number);
     }
 }
