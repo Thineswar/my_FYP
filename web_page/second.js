@@ -55,7 +55,7 @@ $(document).ready(function() {
 function hash_file(callback) {
   var input = document.getElementById("file_input");
   if (document.getElementById("file_input").files.length === 0) {
-    alert("Please select a file first");
+    fade_in("error_message", "Error!", "Please select a file first.");
   } else {
     var file = input.files[0];
     var fr = new FileReader();
@@ -72,18 +72,10 @@ document.getElementById("upload_button").addEventListener("click", function() {
   hash_file(function(err, hash) {
     upload_to_blockchain(hash, function(err, tx) {
       if (tx !== null) {
-        $("#error_message").fadeOut(100, function() {
-            $("#success_message").fadeIn(100, function() {
-              console.log("New upload: " + tx + ".");
-              $("#success_message").html("<strong>Success!</strong> Transaction ID: " + tx + ".");
-            });
-        });
+        fade_in("success_message", "Success!", "Transaction ID: " + tx + ".");
+        console.log("New file upload with hash: " + hash);
       } else {
-          $("#success_message").fadeOut(100, function() {
-            $("#error_message").fadeIn(100, function() {
-              $("#error_message").html("<strong>Error!</strong> Please try again.");
-            });
-          });
+        fade_in("error_message", "Error!", "Please try again.");
       }
     });
   });
@@ -93,18 +85,10 @@ document.getElementById("find_button").addEventListener("click", function() {
   hash_file(function(err, hash) {
     verify(hash, function(err, resultObj) {
       if (resultObj.block_number > 0) {
-        $("#error_message").fadeOut(100, function() {
-          $("#success_message").fadeIn(100, function() {
-            console.log("Hash found at block #" + resultObj.block_number);
-            $("#success_message").html("<strong>Valid!</strong> <br> Certificate was issued on " + resultObj.timestamp);
-          });
-        });
+        fade_in("success_message", "Valid!", " <br> Certificate was issued on " + resultObj.timestamp);
+        console.log("Hash found at block #" + resultObj.block_number);
       } else {
-          $("#success_message").fadeOut(100, function() {
-            $("#error_message").fadeIn(100, function() {
-              $("#error_message").html("<strong>Invalid!</strong> Input file cannot be verified.");
-            });
-          });
+        fade_in("error_message", "Invalid!", "Input file cannot be verified.");
       }
     });
   });
@@ -120,7 +104,11 @@ function upload_to_blockchain(hash, callback) {
         else callback(null, tx);
       });
     } else {
-      alert("Unable to connect to account!");
+      $("#success_message").fadeOut(100, function() {
+        $("#error_message").fadeIn(100, function() {
+          $("#error_message").html("<strong>Error!</strong> Unable to connect to MetaMask account.");
+        });
+      });
     }
   });
 }
@@ -145,4 +133,13 @@ async function getAccount() {
     method: 'eth_requestAccounts'
   });
   return accounts[0];
+}
+
+function fade_in(identifier, message1, message2){
+  $("#error_message").fadeOut(100, function() {
+    $("#success_message").fadeOut(100, function() {
+      $("#"+identifier).html("<strong>" + message1 + "</strong> " + message2);
+      $("#"+identifier).fadeIn("slow");
+    });
+  });
 }
