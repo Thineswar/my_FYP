@@ -1,6 +1,7 @@
 /*jshint esversion: 6 */
 var contract = null;
 var address = "0x6D97310b646F9ADCfcbC4596f5a993857dC6Eb2D"; //contract address
+var acc = null;
 $(document).ready(function() {
   var abi = [
     {
@@ -50,6 +51,15 @@ $(document).ready(function() {
   //creating an instance of the contract
   const web3 = new Web3("http://localhost:7545");
   contract = new web3.eth.Contract(abi, address);
+
+  getAccount().then(acc => {
+    if (acc !== null) {
+      fade_in("alert-info", "Connected!", "Account: " + acc);
+    }else{
+      fade_in("alert-warning", "Warning!", "Unable to connect to MetaMask account. <br> Upload access is disabled.");
+      $("#upload_button").prop('disabled', true);
+    }
+  });
 });
 //hash the input file
 function hash_file(callback) {
@@ -72,10 +82,10 @@ document.getElementById("upload_button").addEventListener("click", function() {
   hash_file(function(err, hash) {
     upload_to_blockchain(hash, function(err, tx) {
       if (tx !== null) {
-        fade_in("success_message", "Success!", "Transaction ID: " + tx + ".");
+        fade_in("alert-success", "Success!", "Transaction ID: " + tx + ".");
         console.log("New file upload with hash: " + hash);
       } else {
-        fade_in("error_message", "Error!", "Please try again.");
+        fade_in("alert-danger", "Error!", "Please try again.");
       }
     });
   });
@@ -85,31 +95,21 @@ document.getElementById("find_button").addEventListener("click", function() {
   hash_file(function(err, hash) {
     verify(hash, function(err, resultObj) {
       if (resultObj.block_number > 0) {
-        fade_in("success_message", "Valid!", " <br> Certificate was issued on " + resultObj.timestamp);
+        fade_in("alert-success", "Valid!", " <br> Certificate was issued on " + resultObj.timestamp);
         console.log("Hash found at block #" + resultObj.block_number);
       } else {
-        fade_in("error_message", "Invalid!", "Input file cannot be verified.");
+        fade_in("alert-danger", "Invalid!", "Input file cannot be verified.");
       }
     });
   });
 });
 //sends the hash to the blockchain
 function upload_to_blockchain(hash, callback) {
-  getAccount().then(acc => {
-    if (acc !== null) {
-      contract.methods.upload(hash).send({
-        from: acc
-      }, function(error, tx) {
-        if (error) callback(error, null);
-        else callback(null, tx);
-      });
-    } else {
-      $("#success_message").fadeOut(100, function() {
-        $("#error_message").fadeIn(100, function() {
-          $("#error_message").html("<strong>Error!</strong> Unable to connect to MetaMask account.");
-        });
-      });
-    }
+  contract.methods.upload(hash).send({
+    from: acc
+  }, function(error, tx) {
+    if (error) callback(error, null);
+    else callback(null, tx);
   });
 }
 //looks up the hash on the blockchain
@@ -136,10 +136,9 @@ async function getAccount() {
 }
 
 function fade_in(identifier, message1, message2){
-  $("#error_message").fadeOut(100, function() {
-    $("#success_message").fadeOut(100, function() {
-      $("#"+identifier).html("<strong>" + message1 + "</strong> " + message2);
-      $("#"+identifier).fadeIn("slow");
-    });
+  $("#message").fadeOut(100, function() {
+    $("#message").removeClass("alert-success", "alert-warning", "alert-danger", "alert-info").addClass(identifier);
+    $("#message").html("<strong>" + message1 + "</strong> " + message2);
+    $("#message").fadeIn("slow");
   });
 }
