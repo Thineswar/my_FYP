@@ -52,8 +52,9 @@ $(document).ready(function() {
   const web3 = new Web3("http://localhost:7545");
   contract = new web3.eth.Contract(abi, address);
 
-  getAccount().then(acc => {
-    if (acc !== null) {
+  getAccount().then(temp_acc => {
+    if (temp_acc !== null) {
+      acc = temp_acc;
       fade_in("alert-info", "Connected!", "Account: " + acc);
     }else{
       fade_in("alert-warning", "Warning!", "Unable to connect to MetaMask account. <br> Upload access is disabled.");
@@ -65,7 +66,7 @@ $(document).ready(function() {
 function hash_file(callback) {
   var input = document.getElementById("file_input");
   if (document.getElementById("file_input").files.length === 0) {
-    fade_in("error_message", "Error!", "Please select a file first.");
+    fade_in("alert-danger", "Error!", "Please select a file first.");
   } else {
     var file = input.files[0];
     var fr = new FileReader();
@@ -80,12 +81,19 @@ function hash_file(callback) {
 //Upload button is pressed
 document.getElementById("upload_button").addEventListener("click", function() {
   hash_file(function(err, hash) {
-    upload_to_blockchain(hash, function(err, tx) {
-      if (tx !== null) {
-        fade_in("alert-success", "Success!", "Transaction ID: " + tx + ".");
-        console.log("New file upload with hash: " + hash);
+    verify(hash, function(err, resultObj) {
+      if (resultObj.block_number > 0) {
+        fade_in("alert-danger", "Error!", " <br> File was already uploaded on <br>" + resultObj.timestamp);
+        console.log("Existing hash found at block #" + resultObj.block_number);
       } else {
-        fade_in("alert-danger", "Error!", "Please try again.");
+        upload_to_blockchain(hash, function(err, tx) {
+          if (tx !== null) {
+            fade_in("alert-success", "Success!", "Transaction ID: " + tx + ".");
+            console.log("New file upload with hash: " + hash);
+          } else {
+            fade_in("alert-danger", "Error!", "Please try again.");
+          }
+        });
       }
     });
   });
@@ -137,7 +145,7 @@ async function getAccount() {
 
 function fade_in(identifier, message1, message2){
   $("#message").fadeOut(100, function() {
-    $("#message").removeClass("alert-success", "alert-warning", "alert-danger", "alert-info").addClass(identifier);
+    $("#message").removeClass("alert-success alert-warning alert-danger alert-info").addClass(identifier);
     $("#message").html("<strong>" + message1 + "</strong> " + message2);
     $("#message").fadeIn("slow");
   });
