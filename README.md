@@ -1,21 +1,37 @@
 # my_FYP
 Digital Certificate Verification System Utilizing Permissioned Blockchain
 
-**Pre-requisites**
+## Sample Screenshot
+
+Main landing page should account be reachable. 
+
+![alt text](Sample_Screenshots/main_page.png)
+
+After uploading a file, an alert box will pop-up with the Transaction ID. 
+
+![alt text](Sample_Screenshots/upload-success.png)
+
+If input file has already been uploaded, an alert box pops up to remind user of the situation. 
+
+![alt text](Sample_Screenshots/upload-fail.png)
+
+## Set-up Guide
+
+### Pre-requisites
 1. Ganache GUI (or any valid alternative).
 1. [npm](https://www.npmjs.com/get-npm) (to install http-server, Truffle and CryptoJS).
 1. http-server: `npm install http-server -g`
 1. Truffle: `npm install truffle -g`
 1. CryptoJS (for hashing input file): `npm install crypto-js -g`
 
-**Smart contracts** (if edited)
+### Smart contracts (if edited)
 1. cd into project folder, then execute `truffle compile`
 1. Open project_folder/build/contracts/certificate.json
 1. Copy values for *abi*.
 1. Open project_folder/web_page/here.js
 1. Replace *abi* values with what was copied.
 
-**Blockchain network**
+### Blockchain network
 1. In Ganache, click on *New Workspace* (Ethereum).
 1. Under *Chain*, set *Gas Price* and *Gas Limit* to be *0*. Everything else can be left at their default values.
 1. Click on *Save Workspace* at the top right.
@@ -27,7 +43,7 @@ Digital Certificate Verification System Utilizing Permissioned Blockchain
 1. In the output, copy *contract address* for certificate.sol.
 1. Open project_folder/web_page/here.js, and replace value for *address* variable (line 3) with what was copied.
 
-**Metamask**
+### Metamask
 1. Under *Networks*, click on *Add Network*.
 1. Give it a name (can be anything you want).
 1. RPC URL is the RPC Server inside Ganache.
@@ -37,7 +53,7 @@ Digital Certificate Verification System Utilizing Permissioned Blockchain
 1. In Ganache GUI, under the *Accounts* tab, under any account, click on the key icon at the right.
 1. Copy the *Private Key* and paste into MetaMask.
 
-**Web page**
+### Web page
 1. cd to project_folder/web_page
 1. Execute command: `http-server .` (a full-stop at the end)
 1. In a web-browser, enter the url: *localhost:8080*
