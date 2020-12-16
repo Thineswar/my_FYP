@@ -55,12 +55,12 @@ $(document).ready(function() {
   getAccount().then(temp_acc => {
     if (temp_acc !== null) {
       acc = temp_acc;
-      fade_in("alert-info", "Connected!", "Account: " + acc);
-    }else{
-      fade_in("alert-warning", "Warning!", "Unable to connect to MetaMask account. <br> Upload access is disabled.");
-      $("#upload_button").prop('disabled', true);
+      $("#upload_button").prop('disabled', false);
     }
   });
+  if (acc === null){
+    $("#upload_button").prop('disabled', true);
+  }
 });
 //hash the input file
 function hash_file(callback) {
