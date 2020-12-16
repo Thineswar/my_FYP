@@ -56,6 +56,7 @@ $(document).ready(function() {
     if (temp_acc !== null) {
       acc = temp_acc;
       $("#upload_button").prop('disabled', false);
+      fade_in("alert-info", "Connected!", " Account: <br>" + acc);
     }
   });
   if (acc === null){
