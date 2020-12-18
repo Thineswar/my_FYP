@@ -13,13 +13,18 @@
         <div class="bg"></div>
         <h1>Digital Certificate Verification System</h1>
         <div class="upload">
-            <input type="file" multiple id="file_input">
-            <p>Click here to choose your file</p>
-            <button class="left_button" id="upload_button">Upload</button>
-            <button class="right_button" id="find_button">Verify</button>
-            <div class="alert" id="message" style="display: none"></div>
-            <!--<div class="alert alert-danger" id="error_message" style="display: none"></div>-->
+            <input type="file" id="file_input">
+            <div class="box">
+                
+                <div class="upload_class" id="upload_text">Click here to choose your file </br> (.pdf only)</div> 
+            </div>
+            <div class="buttons">
+                <button class="left_button" id="upload_button">Upload</button>
+                <button class="right_button" id="find_button">Verify</button>
+                <div class="alert" id="message" style="display: none"></div>
+            </div>
         </div>
+            
 
         <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
         <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
