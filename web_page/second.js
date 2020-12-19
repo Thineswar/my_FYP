@@ -61,6 +61,7 @@ $(document).ready(function() {
   });
   if (acc === null){
     $("#upload_button").prop('disabled', true);
+    fade_in("alert-warning", "Warning!", " No account connected. Upload access is disabled.");
   }
 
   //After file upload, but before any button is pressed
