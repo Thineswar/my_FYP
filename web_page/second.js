@@ -53,34 +53,33 @@ $(document).ready(function() {
   }
   //After file upload, but before any button is pressed
   $('input').change(function() {
-    var fileInput = document.getElementById('file_input');
-    if(fileInput.files.length !== null) {
-      var filename = fileInput.files[0].name;
-      var parts = filename.split('.');
-      $('#upload_text').html("<p>" + filename + "</p>");
-      if(parts[parts.length - 1] !== "pdf") {
-        fade_in("alert-danger", "Error!", "Invalid file type. Please upload PDF files only.");
-        $("#upload_button").prop('disabled', true);
-        $("#find_button").prop('disabled', true);
-      } else {
-        $("#message").fadeOut("slow");
-        $("#upload_button").prop('disabled', false);
-        $("#find_button").prop('disabled', false);
-      }
+    var filename = get_filename();
+    var parts = filename.split('.');
+    $('#upload_text').html("<p>" + filename + "</p>");
+    if(parts[parts.length - 1] !== "pdf") {
+      fade_in("alert-danger", "Error!", filename + " is of an invalid file type. Please upload PDF files only.");
+      $("#upload_button").prop('disabled', true);
+      $("#find_button").prop('disabled', true);
+    } else {
+      $("#message").fadeOut("slow");
+      $("#upload_button").prop('disabled', false);
+      $("#find_button").prop('disabled', false);
     }
+    //}
   });
   //Add event listener to both buttons
   document.getElementById("upload_button").addEventListener("click", function() {
     hash_file(function(err, hash) {
       verify(hash, function(err, resultObj) {
+        var filename = get_filename();
         if(resultObj.block_number > 0) {
-          fade_in("alert-danger", "Error!", " <br> Certificate was already uploaded on <br>" + resultObj.timestamp);
-          console.log("Existing hash found at block #" + resultObj.block_number);
+          fade_in("alert-danger", "Error!", " <br> " + filename + " was already uploaded on <br>" + resultObj.timestamp);
+          console.log(filename + " found at block #" + resultObj.block_number);
         } else {
           upload_to_blockchain(hash, function(err, tx) {
             if(tx !== null) {
-              fade_in("alert-success", "Success!", "Transaction ID: " + tx + ".");
-              console.log("New certificate upload with hash: " + hash);
+              fade_in("alert-success", "Success!", filename + " has been uploaded.");
+              console.log(filename + " uploaded with transaction ID: " + tx);
             } else {
               fade_in("alert-danger", "Error!", "Please try again.");
             }
@@ -92,11 +91,12 @@ $(document).ready(function() {
   document.getElementById("find_button").addEventListener("click", function() {
     hash_file(function(err, hash) {
       verify(hash, function(err, resultObj) {
+        var filename = get_filename();
         if(resultObj.block_number > 0) {
-          fade_in("alert-success", "Valid!", " <br> Certificate was uploaded on <br>" + resultObj.timestamp);
-          console.log("Hash found at block #" + resultObj.block_number);
+          fade_in("alert-success", "Valid!", " <br>" + filename + " was uploaded on <br>" + resultObj.timestamp);
+          console.log(filename + " found at block #" + resultObj.block_number);
         } else {
-          fade_in("alert-danger", "Invalid!", "Input certificate cannot be verified.");
+          fade_in("alert-danger", "Invalid!", filename + " cannot be verified.");
         }
       });
     });
@@ -156,4 +156,10 @@ function fade_in(identifier, message1, message2) {
     $("#message").html("<strong>" + message1 + "</strong> " + message2);
     $("#message").fadeIn("slow");
   });
+}
+function get_filename(){
+  var fileInput = document.getElementById('file_input');
+  if(fileInput.files.length !== null) {
+    return fileInput.files[0].name;
+  }
 }
