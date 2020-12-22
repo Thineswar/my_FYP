@@ -1,31 +1,30 @@
 body, html {
-  height: 100%;
-  text-align: center;
+	height: 100%;
+	text-align: center;
 }
 
-.bg {
-	background-image: url("Assets/background.jpg");
-	height: 100%; 
-	background-position: center;
-	background-attachment: fixed;
-	background-repeat: no-repeat;
+body {
+	background-image: url("Assets/background_4.jpg");
 	background-size: cover;
-	filter: brightness(25%) blur(2px);
 	position: relative;
-	transform: scale(1.1);
+	overflow: hidden;
 }
 
-h1{
+.header {
+	padding: 20px 20px 20px 20px;
+}
+
+h1 {
 	font-family: 'Baloo Tamma 2', cursive;
 	top: 20%;
 	position: absolute;
-	color: white;
+	color: #141414;
 	font-size: 4vw;
-	left: 0; 
+	left: 0;
 	right: 0;
 }
 
-.upload{
+.upload {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -33,23 +32,19 @@ h1{
 	margin-left: -250px;
 	width: 550px;
 	height: 200px;
-	border: 4px dashed #fff;
+	border: 4px dashed #404040;
 }
 
-.upload_class{
-	
-	color: white;
+.upload_class {
+	color: #141414;
 	font-family: 'Baloo Tamma 2';
 	font-size: 15pt;
-}
-
-.box{
 	padding-top: 75px;
 	padding-bottom: 50px;
 	height: 200px;
 }
 
-input{
+input {
 	opacity: 0;
 	position: absolute;
 	margin: 0;
@@ -59,8 +54,8 @@ input{
 	outline: none;
 }
 
-button{
-	color: white;
+button {
+	color: #404040;
 	width: 40%;
 	border: 5px solid;
 	height: 50px;
@@ -69,41 +64,41 @@ button{
 	border-image-slice: 1;
 }
 
-.buttons{
+.buttons {
 	padding-top: 50px;
 }
 
-button:focus{
+button:focus {
 	outline: 0;
 }
 
-button:hover:enabled{
-	box-shadow: 0 12px 16px 0 rgba(0,0,0,0.7), 0 17px 50px 0 rgba(0,0,0,0.6);
+button:hover:enabled {
+	color: white;
 }
 
-.left_button{
+button:disabled {
+	opacity: 0.4;
+}
+
+.left_button {
 	margin-right: 9%;
-	border-image-source: linear-gradient(to right, #78e4ff, #ff48fa); 	
+	border-image-source: linear-gradient(to right, #78e4ff, #ff48fa);
 }
 
-.left_button:hover:enabled{
+.left_button:hover:enabled {
 	background-image: linear-gradient(101deg, #78e4ff, #ff48fa);
 }
 
-.right_button{
+.right_button {
 	margin-left: 9%;
-	border-image-source: linear-gradient(to right, #ff48fa, #78e4ff); 	
+	border-image-source: linear-gradient(to right, #ff48fa, #78e4ff);
 }
 
-.right_button:hover:enabled{
+.right_button:hover:enabled {
 	background-image: linear-gradient(101deg, #ff48fa, #78e4ff);
 }
 
-.alert{
+.alert {
 	margin-top: 35px;
 	width: 100%;
-}
-
-button:disabled{
-	opacity: 0.4;
 }
