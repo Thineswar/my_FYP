@@ -44,20 +44,21 @@ $(document).ready(function() {
     if(temp_acc !== null) {
       acc = temp_acc;
       $("#upload_button").prop('disabled', false);
-      fade_in("alert-info", "Connected!", " Account: <br>" + acc);
+      first_fade("alert-info", "Connected!", " Account: <br>" + acc);
     }
   });
   if(acc === null) {
     $("#upload_button").prop('disabled', true);
-    fade_in("alert-warning", "Warning!", " No account connected. Upload access is disabled.");
+    first_fade("alert-warning", "Warning!", " No account connected. Upload access is disabled.");
   }
   //After file upload, but before any button is pressed
   $('input').change(function() {
+    $("#message").empty();
     var filename = get_filename();
     var parts = filename.split('.');
     $('#upload_text').html("<p>" + filename + "</p>");
     if(parts[parts.length - 1] !== "pdf") {
-      fade_in("alert-danger", "Error!", filename + " is of an invalid file type. Please upload PDF files only.");
+      second_fade("alert-danger", "Error! ", filename + " is of an invalid file type. Please upload PDF files only.");
       $("#upload_button").prop('disabled', true);
       $("#find_button").prop('disabled', true);
     } else {
@@ -71,17 +72,18 @@ $(document).ready(function() {
   document.getElementById("upload_button").addEventListener("click", function() {
     hash_file(function(err, hash) {
       verify(hash, function(err, resultObj) {
+        $("#message").empty();
         var filename = get_filename();
         if(resultObj.block_number > 0) {
-          fade_in("alert-danger", "Error!", " <br> " + filename + " was already uploaded on <br>" + resultObj.timestamp);
+          second_fade("alert-danger", "Error!", " <br> " + filename + " was already uploaded on <br>" + resultObj.timestamp);
           console.log(filename + " found at block #" + resultObj.block_number);
         } else {
           upload_to_blockchain(hash, function(err, tx) {
             if(tx !== null) {
-              fade_in("alert-success", "Success!", filename + " has been uploaded.");
+              second_fade("alert-success", "Success!", filename + " has been uploaded.");
               console.log(filename + " uploaded with transaction ID: " + tx);
             } else {
-              fade_in("alert-danger", "Error!", "Please try again.");
+              second_fade("alert-danger", "Error!", "Please try again.");
             }
           });
         }
@@ -91,12 +93,13 @@ $(document).ready(function() {
   document.getElementById("find_button").addEventListener("click", function() {
     hash_file(function(err, hash) {
       verify(hash, function(err, resultObj) {
+        $("#message").empty();
         var filename = get_filename();
         if(resultObj.block_number > 0) {
-          fade_in("alert-success", "Valid!", " <br>" + filename + " was uploaded on <br>" + resultObj.timestamp);
+          second_fade("alert-success", "Valid!", " <br>" + filename + " was uploaded on <br>" + resultObj.timestamp);
           console.log(filename + " found at block #" + resultObj.block_number);
         } else {
-          fade_in("alert-danger", "Invalid!", filename + " cannot be verified.");
+          second_fade("alert-danger", "Invalid!", filename + " cannot be verified.");
         }
       });
     });
@@ -106,7 +109,8 @@ $(document).ready(function() {
 function hash_file(callback) {
   var input = document.getElementById("file_input");
   if(document.getElementById("file_input").files.length === 0) {
-    fade_in("alert-danger", "Error!", "Please select a file first.");
+    $("#message").empty();
+    second_fade("alert-danger", "Error!", " Please select a file first.");
   } else {
     var file = input.files[0];
     var fr = new FileReader();
@@ -118,7 +122,6 @@ function hash_file(callback) {
     fr.readAsArrayBuffer(file);
   }
 }
-  
 //sends the hash to the blockchain
 function upload_to_blockchain(hash, callback) {
   contract.methods.upload(hash).send({
@@ -150,10 +153,16 @@ async function getAccount() {
   });
   return accounts[0];
 }
-function fade_in(identifier, message1, message2) {
+function first_fade(special_class, message1, message2) {
+  $("#first_message").fadeOut(100, function() {
+    $("#first_message").removeClass("alert-warning alert-info").addClass(special_class);
+    $("#first_message").html("<strong>" + message1 + "</strong> " + message2);
+    $("#first_message").fadeIn("slow");
+  });
+}
+function second_fade(special_class, message1, message2){
   $("#message").fadeOut(100, function() {
-    $("#message").removeClass("alert-success alert-warning alert-danger alert-info").addClass(identifier);
-    $("#message").html("<strong>" + message1 + "</strong> " + message2);
+    $("#message").append("<div class='alert " + special_class + "' id=second_message>" + "<strong>" + message1 + "</strong>" + message2+ "</div>");
     $("#message").fadeIn("slow");
   });
 }
