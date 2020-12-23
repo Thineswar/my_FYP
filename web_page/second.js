@@ -1,4 +1,8 @@
 /*jshint esversion: 6 */
+
+//after upload, call hash function
+
+
 var contract = null;
 var address = "0x6D97310b646F9ADCfcbC4596f5a993857dC6Eb2D"; //contract address
 var acc = null;
@@ -59,16 +63,16 @@ $(document).ready(function() {
         $('.upload_class').empty();
         for(var i = 0; i < files.length; i++) {
           $("#message").empty();
-          $('.upload_class').append("<p>" + files[i].name + "</p>");
           if(files[i].name.split('.')[files[i].name.split('.').length - 1] !== "pdf") {
             second_fade("alert-danger", "Error! ", files[i].name + " is of an invalid file type. <br> Please upload PDF files only.");
-            $("#upload_button").prop('disabled', true);
-            $("#find_button").prop('disabled', true);
-            break;
+            //$("#upload_button").prop('disabled', true);
+            //$("#find_button").prop('disabled', true);
+            //break;
           } else {
+            $('.upload_class').append("<p>" + files[i].name + "</p>");
             $("#message").fadeOut("slow");
-            $("#upload_button").prop('disabled', false);
-            $("#find_button").prop('disabled', false);
+            //$("#upload_button").prop('disabled', false);
+            //$("#find_button").prop('disabled', false);
           }
         }
         //change top and bottom paddings of text inside dashed box
