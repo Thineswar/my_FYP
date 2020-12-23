@@ -69,7 +69,6 @@ $(document).ready(function() {
             $("#message").fadeOut("slow");
             $("#upload_button").prop('disabled', false);
             $("#find_button").prop('disabled', false);
-            $("input").css("height", $(".box").css("height"));
           }
         }
         //change top and bottom paddings of text inside dashed box
@@ -78,6 +77,7 @@ $(document).ready(function() {
           "padding-top": temp,
           "padding-bottom": temp
         });
+        $("input").css("height", $(".box").css("height"));
       } else if(files.length > 10) second_fade("alert-danger", "Error!", " Only 10 files can be uploaded at once.");
     }
   });
