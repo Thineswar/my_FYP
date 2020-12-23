@@ -53,35 +53,33 @@ $(document).ready(function() {
   }
   //After file upload, but before any button is pressed
   $('input').change(function() {
-    $("#message").empty();
     var files = get_filename();
-    if (files !== null && files.length<=10 && files[0].name !== null){
-      $('.upload_class').empty();
-      for (var i = 0; i < files.length; i++){
-        $('.upload_class').append("<p>" + files[i].name + "</p>");
-        if(files[i].name.split('.')[files[i].name.split('.').length - 1] !== "pdf") {
-          second_fade("alert-danger", "Error! ", files[i].name + " is of an invalid file type. <br> Please upload PDF files only.");
-          $("#upload_button").prop('disabled', true);
-          $("#find_button").prop('disabled', true);
-          break;
-        } else {
-          $("#message").fadeOut("slow");
-          $("#upload_button").prop('disabled', false);
-          $("#find_button").prop('disabled', false);
-          $("input").css("height", $(".box").css("height"));
+    if(files !== null && files[0] !== undefined) {
+      if(files.length <= 10) {
+        $('.upload_class').empty();
+        for(var i = 0; i < files.length; i++) {
+          $("#message").empty();
+          $('.upload_class').append("<p>" + files[i].name + "</p>");
+          if(files[i].name.split('.')[files[i].name.split('.').length - 1] !== "pdf") {
+            second_fade("alert-danger", "Error! ", files[i].name + " is of an invalid file type. <br> Please upload PDF files only.");
+            $("#upload_button").prop('disabled', true);
+            $("#find_button").prop('disabled', true);
+            break;
+          } else {
+            $("#message").fadeOut("slow");
+            $("#upload_button").prop('disabled', false);
+            $("#find_button").prop('disabled', false);
+            $("input").css("height", $(".box").css("height"));
+          }
         }
-      }
-      //change top and bottom paddings of text inside dashed box
-      var temp = (200-($('.upload_class p').css("line-height").replace(/[^-\d\.]/g, '') * $('.upload_class p').length))/2;
-      $('.upload_class').css({
-        "padding-top":temp,
-        "padding-bottom": temp
-      });
+        //change top and bottom paddings of text inside dashed box
+        var temp = (200 - ($('.upload_class p').css("line-height").replace(/[^-\d\.]/g, '') * $('.upload_class p').length)) / 2;
+        $('.upload_class').css({
+          "padding-top": temp,
+          "padding-bottom": temp
+        });
+      } else if(files.length > 10) second_fade("alert-danger", "Error!", " Only 10 files can be uploaded at once.");
     }
-    else if (!files.length<=10)
-      second_fade("alert-danger", "Error!", " Only 10 files can be uploaded at once.");
-
-    
   });
   //Add event listener to both buttons
   document.getElementById("upload_button").addEventListener("click", function() {
@@ -168,6 +166,7 @@ async function getAccount() {
   });
   return accounts[0];
 }
+
 function first_fade(special_class, message1, message2) {
   $("#first_message").fadeOut(100, function() {
     $("#first_message").removeClass("alert-warning alert-info").addClass(special_class);
@@ -175,16 +174,16 @@ function first_fade(special_class, message1, message2) {
     $("#first_message").fadeIn("slow");
   });
 }
-function second_fade(special_class, message1, message2){
+
+function second_fade(special_class, message1, message2) {
   $("#message").fadeOut(100, function() {
-    $("#message").append("<div class='alert " + special_class + "' id=second_message>" + "<strong>" + message1 + "</strong>" + message2+ "</div>");
+    $("#message").append("<div class='alert " + special_class + "' id=second_message>" + "<strong>" + message1 + "</strong>" + message2 + "</div>");
     $("#message").fadeIn("slow");
   });
 }
-function get_filename(){
+
+function get_filename() {
   var fileInput = document.getElementById('file_input');
-  if(fileInput.files.length !== null)
-    return fileInput.files;
-  else
-    return null;
+  if(fileInput.files.length !== null) return fileInput.files;
+  else return null;
 }
