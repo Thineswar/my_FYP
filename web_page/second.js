@@ -66,6 +66,8 @@ $(document).ready(function() {
             second_fade("alert-danger", "Error! ", files[i].name + " is of an invalid file type. <br> Please upload PDF files only.");
             $("#upload_button").prop('disabled', true);
             $("#find_button").prop('disabled', true);
+            //remove file from array
+            files.splice(i, 1);
             break;
           } else {
             $('.upload_class').append("<p>" + files[i].name + "</p>");
