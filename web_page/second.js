@@ -1,12 +1,4 @@
 /*jshint esversion: 6 */
-
-
-
-//alert box is too long for long file_names
-//alert boxes
-
-
-
 var contract = null;
 var address = "0x6D97310b646F9ADCfcbC4596f5a993857dC6Eb2D"; //contract address
 var acc = null;
@@ -57,14 +49,13 @@ $(document).ready(function() {
   });
   if(acc === null) {
     $("#upload_button").prop('disabled', true);
-    first_fade("alert-warning", "Warning!", " No account connected. Upload access is disabled.");
+    first_fade("alert-warning", "Warning!", " No account detected. Upload access is disabled.");
   }
   //After file upload, but before any button is pressed
   $('input').change(function() {
     $("#message").empty();
     var files = get_filename();
     if (files !== null && files.length<=10 && files[0].name !== null){
-      //$('#upload_text').remove();
       $('.upload_class').empty();
       for (var i = 0; i < files.length; i++){
         $('.upload_class').append("<p>" + files[i].name + "</p>");
