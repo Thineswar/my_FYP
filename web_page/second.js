@@ -2,7 +2,6 @@
 
 //after upload, call hash function
 
-
 var contract = null;
 var address = "0x6D97310b646F9ADCfcbC4596f5a993857dC6Eb2D"; //contract address
 var acc = null;
@@ -65,14 +64,14 @@ $(document).ready(function() {
           $("#message").empty();
           if(files[i].name.split('.')[files[i].name.split('.').length - 1] !== "pdf") {
             second_fade("alert-danger", "Error! ", files[i].name + " is of an invalid file type. <br> Please upload PDF files only.");
-            //$("#upload_button").prop('disabled', true);
-            //$("#find_button").prop('disabled', true);
-            //break;
+            $("#upload_button").prop('disabled', true);
+            $("#find_button").prop('disabled', true);
+            break;
           } else {
             $('.upload_class').append("<p>" + files[i].name + "</p>");
             $("#message").fadeOut("slow");
-            //$("#upload_button").prop('disabled', false);
-            //$("#find_button").prop('disabled', false);
+            $("#upload_button").prop('disabled', false);
+            $("#find_button").prop('disabled', false);
           }
         }
         //change top and bottom paddings of text inside dashed box
@@ -91,7 +90,7 @@ $(document).ready(function() {
       verify(hash, function(err, resultObj) {
         $("#message").empty();
         var filename = get_filename();
-        if(resultObj.block_number > 0) {
+        if(resultObj !== null && resultObj.block_number > 0) {
           second_fade("alert-danger", "Error!", " <br> " + filename + " was already uploaded on <br>" + resultObj.timestamp);
           console.log(filename + " found at block #" + resultObj.block_number);
         } else {
@@ -100,7 +99,7 @@ $(document).ready(function() {
               second_fade("alert-success", "Success!", filename + " has been uploaded.");
               console.log(filename + " uploaded with transaction ID: " + tx);
             } else {
-              second_fade("alert-danger", "Error!", "Please try again.");
+              second_fade("alert-danger", "Error!", " Please try again.");
             }
           });
         }
