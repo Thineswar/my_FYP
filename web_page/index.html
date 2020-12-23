@@ -19,9 +19,12 @@
     <div class="header"> <img src="Assets/MMU_logo.png" style="float: left" /> <img src="Assets/MMU_tagline.png" style="float: right" /> </div>
     <h1>Digital Certificate Verification System</h1>
     <div class="upload">
-        <input type="file" id="file_input">
-        <div class="upload_class" id="upload_text">Click here to choose file
-            <br> (.pdf only)</div>
+        <div class="box">
+            <input type="file" multiple id="file_input">
+            <div class="upload_class">
+                Click here to choose file <br> (.pdf only)
+            </div>
+        </div>
         <div class="buttons">
             <button class="left_button" id="upload_button">Upload</button>
             <button class="right_button" id="find_button">Verify</button>
@@ -33,3 +36,5 @@
 </body>
 
 </html>
+
+

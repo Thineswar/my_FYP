@@ -1,4 +1,12 @@
 /*jshint esversion: 6 */
+
+
+
+//alert box is too long for long file_names
+//alert boxes
+
+
+
 var contract = null;
 var address = "0x6D97310b646F9ADCfcbC4596f5a993857dC6Eb2D"; //contract address
 var acc = null;
@@ -54,19 +62,35 @@ $(document).ready(function() {
   //After file upload, but before any button is pressed
   $('input').change(function() {
     $("#message").empty();
-    var filename = get_filename();
-    var parts = filename.split('.');
-    $('#upload_text').html("<p>" + filename + "</p>");
-    if(parts[parts.length - 1] !== "pdf") {
-      second_fade("alert-danger", "Error! ", filename + " is of an invalid file type. Please upload PDF files only.");
-      $("#upload_button").prop('disabled', true);
-      $("#find_button").prop('disabled', true);
-    } else {
-      $("#message").fadeOut("slow");
-      $("#upload_button").prop('disabled', false);
-      $("#find_button").prop('disabled', false);
+    var files = get_filename();
+    if (files !== null && files.length<=10 && files[0].name !== null){
+      //$('#upload_text').remove();
+      $('.upload_class').empty();
+      for (var i = 0; i < files.length; i++){
+        $('.upload_class').append("<p>" + files[i].name + "</p>");
+        if(files[i].name.split('.')[files[i].name.split('.').length - 1] !== "pdf") {
+          second_fade("alert-danger", "Error! ", files[i].name + " is of an invalid file type. <br> Please upload PDF files only.");
+          $("#upload_button").prop('disabled', true);
+          $("#find_button").prop('disabled', true);
+          break;
+        } else {
+          $("#message").fadeOut("slow");
+          $("#upload_button").prop('disabled', false);
+          $("#find_button").prop('disabled', false);
+          $("input").css("height", $(".box").css("height"));
+        }
+      }
+      //change top and bottom paddings of text inside dashed box
+      var temp = (200-($('.upload_class p').css("line-height").replace(/[^-\d\.]/g, '') * $('.upload_class p').length))/2;
+      $('.upload_class').css({
+        "padding-top":temp,
+        "padding-bottom": temp
+      });
     }
-    //}
+    else if (!files.length<=10)
+      second_fade("alert-danger", "Error!", " Only 10 files can be uploaded at once.");
+
+    
   });
   //Add event listener to both buttons
   document.getElementById("upload_button").addEventListener("click", function() {
@@ -168,7 +192,8 @@ function second_fade(special_class, message1, message2){
 }
 function get_filename(){
   var fileInput = document.getElementById('file_input');
-  if(fileInput.files.length !== null) {
-    return fileInput.files[0].name;
-  }
+  if(fileInput.files.length !== null)
+    return fileInput.files;
+  else
+    return null;
 }
