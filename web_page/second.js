@@ -112,10 +112,10 @@ $(document).ready(function() {
         $("#message").empty();
         var filename = get_filename();
         if(resultObj.block_number > 0) {
-          second_fade("alert-success", "Valid!", " <br>" + filename + " was uploaded on <br>" + resultObj.timestamp);
+          second_fade("alert-success", "Valid! ", " <br>" + filename + " was uploaded on <br>" + resultObj.timestamp);
           console.log(filename + " found at block #" + resultObj.block_number);
         } else {
-          second_fade("alert-danger", "Invalid!", filename + " cannot be verified.");
+          second_fade("alert-danger", "Invalid! ", filename + " cannot be verified.");
         }
       });
     });
