@@ -100,14 +100,14 @@ $(document).ready(function() {
   });
   //Add event listener to both buttons
   document.getElementById("upload_button").addEventListener("click", function() {
+    $("#message").empty();
     get_filename(function(files) {
       for(var i = 0; i < files.length; i++) {
-        hash_file(files[i], function(hash) {
+        hash_file(files[i], function(filename, hash) {
           verify(hash, function(resultObj) {
-            $("#message").empty();
-            if(resultObj !== null) {
-              fade_in("alert-danger", "Error!", " <br> " + files[i].name + " was already uploaded on <br>" + resultObj.timestamp);
-              console.log(files[i].name + " found at block #" + resultObj.block_number);
+            if(resultObj !== null && resultObj.block_number > 0) {
+              fade_in("alert-danger", "Error!", " <br> " + filename + " was already uploaded on <br>" + resultObj.timestamp);
+              console.log(filename + " already exists at block #" + resultObj.block_number);
             } else {
               upload_to_blockchain(hash, function(tx) {
                 fade_in("alert-success", "Success! ", files[i].name + " has been uploaded.");
@@ -120,16 +120,17 @@ $(document).ready(function() {
     })
   });
   document.getElementById("find_button").addEventListener("click", function() {
+    $("#message").empty();
     get_filename(function(files) {
       for(var i = 0; i < files.length; i++) {
-        hash_file(files[i], function(hash) {
+        hash_file(files[i], function(filename, hash) {
           verify(hash, function(resultObj) {
-            $("#message").empty();
-            if(resultObj !== null) {
-              fade_in("alert-success", "Valid! ", " <br>" + files[i].name + " was uploaded on <br>" + resultObj.timestamp);
-              console.log(files[i].name + " found at block #" + resultObj.block_number);
+            if(resultObj !== null && resultObj.block_number > 0) {
+              fade_in("alert-success", "Valid! ", " <br>" + filename + " was uploaded on <br>" + resultObj.timestamp);
+              console.log(filename + " found at block #" + resultObj.block_number);
             } else {
-              fade_in("alert-danger", "Invalid! ", files[i].name + " cannot be verified.");
+              fade_in("alert-danger", "Invalid! ", filename + " cannot be verified.");
+              console.log(filename + " was not found in the blockchain.");
             }
           });
         });
@@ -144,14 +145,14 @@ function hash_file(file, callback) {
   fr.onload = function(e) {
     var temp = CryptoJS.lib.WordArray.create(fr.result);
     var hash = "0x" + CryptoJS.SHA256(temp).toString();
-    callback(hash);
+    callback(file.name, hash);
   };
 }
 //sends the hash to the blockchain
 function upload_to_blockchain(hash, callback) {
   contract.methods.upload(hash).send({
     from: acc
-  }, function(tx) {
+  }, function(error, tx) {
     if(error) fade_in("alert-danger", "Error!", " Please try again.");
     else callback(tx);
   });
@@ -177,7 +178,7 @@ async function getAccount() {
 }
 
 function fade_in(special_class, message1, message2) {
-  $("#message").fadeOut(100, function() {
+  $("#message").fadeOut("fast", function() {
     $("#message").append("<div class='alert " + special_class + "' id=alert_message>" + "<strong>" + message1 + "</strong>" + message2 + "</div>");
     $("#message").fadeIn("slow");
   });
