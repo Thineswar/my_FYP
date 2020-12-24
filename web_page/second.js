@@ -1,7 +1,7 @@
 /*jshint esversion: 6 */
-
-//after upload, call hash function
-
+//test if filetype checking works
+//generate only 1 success message
+//merge both message fade functions
 var contract = null;
 var address = "0x6D97310b646F9ADCfcbC4596f5a993857dC6Eb2D"; //contract address
 var acc = null;
@@ -50,30 +50,34 @@ $(document).ready(function() {
       first_fade("alert-info", "Connected!", " Account: <br>" + acc);
     }
   });
+  //if getAccount function fails, it is because no account is connected
   if(acc === null) {
     $("#upload_button").prop('disabled', true);
     first_fade("alert-warning", "Warning!", " No account detected. Upload access is disabled.");
   }
   //After file upload, but before any button is pressed
   $('input').change(function() {
-    var files = get_filename();
-    if(files !== null && files[0] !== undefined) {
+    get_filename(function(files) {
       if(files.length <= 10) {
         $('.upload_class').empty();
-        for(var i = 0; i < files.length; i++) {
+        for(var i = 0; i < files.length;) {
           $("#message").empty();
+          //check for filetype
           if(files[i].name.split('.')[files[i].name.split('.').length - 1] !== "pdf") {
             second_fade("alert-danger", "Error! ", files[i].name + " is of an invalid file type. <br> Please upload PDF files only.");
-            $("#upload_button").prop('disabled', true);
-            $("#find_button").prop('disabled', true);
             //remove file from array
             files.splice(i, 1);
-            break;
+            //no need all these, since the file is removed
+            //$("#upload_button").prop('disabled', true);
+            //$("#find_button").prop('disabled', true);
+            //break;
           } else {
             $('.upload_class').append("<p>" + files[i].name + "</p>");
-            $("#message").fadeOut("slow");
-            $("#upload_button").prop('disabled', false);
-            $("#find_button").prop('disabled', false);
+            $("#message").fadeOut("slow", function() {
+              $("#upload_button").prop('disabled', false);
+              $("#find_button").prop('disabled', false);
+            });
+            i++;
           }
         }
         //change top and bottom paddings of text inside dashed box
@@ -82,87 +86,81 @@ $(document).ready(function() {
           "padding-top": temp,
           "padding-bottom": temp
         });
+        //fill dashed box with file input
         $("input").css("height", $(".box").css("height"));
       } else if(files.length > 10) second_fade("alert-danger", "Error!", " Only 10 files can be uploaded at once.");
-    }
+    });
+    //if(files !== null && files[0] !== undefined) {
   });
   //Add event listener to both buttons
   document.getElementById("upload_button").addEventListener("click", function() {
-    hash_file(function(err, hash) {
-      verify(hash, function(err, resultObj) {
-        $("#message").empty();
-        var filename = get_filename();
-        if(resultObj !== null && resultObj.block_number > 0) {
-          second_fade("alert-danger", "Error!", " <br> " + filename + " was already uploaded on <br>" + resultObj.timestamp);
-          console.log(filename + " found at block #" + resultObj.block_number);
-        } else {
-          upload_to_blockchain(hash, function(err, tx) {
-            if(tx !== null) {
-              second_fade("alert-success", "Success!", filename + " has been uploaded.");
-              console.log(filename + " uploaded with transaction ID: " + tx);
+    get_filename(function(files) {
+      for(var i = 0; i < files.length; i++) {
+        hash_file(files[i], function(hash) {
+          verify(hash, function(resultObj) {
+            $("#message").empty();
+            if(resultObj !== null) {
+              second_fade("alert-danger", "Error!", " <br> " + filename + " was already uploaded on <br>" + resultObj.timestamp);
+              console.log(filename + " found at block #" + resultObj.block_number);
             } else {
-              second_fade("alert-danger", "Error!", " Please try again.");
+              upload_to_blockchain(hash, function(tx) {
+                second_fade("alert-success", "Success! ", filename + " has been uploaded.");
+                console.log(filename + " uploaded with transaction ID: " + tx);
+              });
             }
           });
-        }
-      });
-    });
+        })
+      }
+    })
   });
   document.getElementById("find_button").addEventListener("click", function() {
-    hash_file(function(err, hash) {
-      verify(hash, function(err, resultObj) {
-        $("#message").empty();
-        var filename = get_filename();
-        if(resultObj.block_number > 0) {
-          second_fade("alert-success", "Valid! ", " <br>" + filename + " was uploaded on <br>" + resultObj.timestamp);
-          console.log(filename + " found at block #" + resultObj.block_number);
-        } else {
-          second_fade("alert-danger", "Invalid! ", filename + " cannot be verified.");
-        }
-      });
+    get_filename(function(files) {
+      for(var i = 0; i < files.length; i++) {
+        hash_file(files[i], function(hash) {
+          verify(hash, function(resultObj) {
+            $("#message").empty();
+            if(resultObj !== null) {
+              second_fade("alert-success", "Valid! ", " <br>" + filename + " was uploaded on <br>" + resultObj.timestamp);
+              console.log(filename + " found at block #" + resultObj.block_number);
+            } else {
+              second_fade("alert-danger", "Invalid! ", filename + " cannot be verified.");
+            }
+          });
+        });
+      }
     });
   });
 });
 //hash the input file
-function hash_file(callback) {
-  var input = document.getElementById("file_input");
-  if(document.getElementById("file_input").files.length === 0) {
-    $("#message").empty();
-    second_fade("alert-danger", "Error!", " Please select a file first.");
-  } else {
-    var file = input.files[0];
-    var fr = new FileReader();
-    fr.onload = function(e) {
-      var temp = CryptoJS.lib.WordArray.create(fr.result);
-      var hash = "0x" + CryptoJS.SHA256(temp).toString();
-      callback(null, hash);
-    };
-    fr.readAsArrayBuffer(file);
-  }
+function hash_file(file, callback) {
+  var fr = new FileReader();
+  fr.readAsArrayBuffer(file);
+  fr.onload = function(e) {
+    var temp = CryptoJS.lib.WordArray.create(fr.result);
+    var hash = "0x" + CryptoJS.SHA256(temp).toString();
+    callback(hash);
+  };
 }
 //sends the hash to the blockchain
 function upload_to_blockchain(hash, callback) {
   contract.methods.upload(hash).send({
     from: acc
-  }, function(error, tx) {
-    if(error) callback(error, null);
-    else callback(null, tx);
+  }, function(tx) {
+    if(error) second_fade("alert-danger", "Error!", " Please try again.");
+    else callback(tx);
   });
 }
 //looks up the hash on the blockchain
 function verify(hash, callback) {
-  if(hash !== null) {
-    contract.methods.verify(hash).call(function(error, result) {
-      if(error) callback(error, null);
-      else {
-        let resultObj = {
-          timestamp: new Date(result[0] * 1000),
-          block_number: result[1]
-        };
-        callback(null, resultObj);
-      }
-    });
-  }
+  contract.methods.verify(hash).call(function(error, result) {
+    if(!error) {
+      let resultObj = {
+        timestamp: new Date(result[0] * 1000),
+        block_number: result[1]
+      };
+      callback(resultObj);
+    } else callback(null);
+  });
 }
 //Get account in MetaMask
 async function getAccount() {
@@ -187,8 +185,8 @@ function second_fade(special_class, message1, message2) {
   });
 }
 
-function get_filename() {
+function get_filename(callback) {
   var fileInput = document.getElementById('file_input');
-  if(fileInput.files.length !== null) return fileInput.files;
-  else return null;
+  if(fileInput.files.length !== null) callback(fileInput.files);
+  else second_fade("alert-danger", "Error!", " Please select a file first.");
 }
