@@ -1,9 +1,9 @@
 /*jshint esversion: 6 */
-//test if filetype checking works
 //generate only 1 success message
 var contract = null;
 var address = "0x6D97310b646F9ADCfcbC4596f5a993857dC6Eb2D"; //contract address
 var acc = null;
+var file_array = [];
 $(document).ready(function() {
   var abi = [{
     "inputs": [],
@@ -44,79 +44,82 @@ $(document).ready(function() {
     get_filename(function(files) {
       if(files.length <= 10) {
         $('.upload_class').empty();
-        for(var i = 0; i < files.length;) {
-          $("#alert_message").fadeOut(100, function(){
+        $("#message").fadeOut("slow", function(){
             $("#message").empty();
-          });
-          $("#message").empty();
+        });
+        for(var i = 0; i < files.length; i++) {
           //check for filetype
           if(files[i].name.split('.')[files[i].name.split('.').length - 1] !== "pdf") {
             fade_in("alert-danger", "Error! ", files[i].name + " is of an invalid file type. <br> Please upload PDF files only.");
-            //remove file from array
-            files.splice(i, 1);
-            //no need all these, since the file is removed
-            //$("#upload_button").prop('disabled', true);
-            //$("#find_button").prop('disabled', true);
-            //break;
           } else {
+            file_array.push(files[i]);
             $('.upload_class').append("<p>" + files[i].name + "</p>");
-            $("#message").fadeOut("slow", function() {
-              $("#upload_button").prop('disabled', false);
-              $("#find_button").prop('disabled', false);
-            });
-            i++;
+            $("#message").fadeOut("slow");
           }
         }
-        //change top and bottom paddings of text inside dashed box
-        var temp = (200 - ($('.upload_class p').css("line-height").replace(/[^-\d\.]/g, '') * $('.upload_class p').length)) / 2;
-        $('.upload_class').css({
-          "padding-top": temp,
-          "padding-bottom": temp
-        });
-        //fill dashed box with file input
-        $("input").css("height", $(".box").css("height"));
+
+        if ($('.upload_class').is(':empty')){
+          //not even one pdf file was selected
+          $('.upload_class').append("<p>Click here to choose file <br> (.pdf only)</p>");
+        }
+        else{
+          //change top and bottom paddings of text inside dashed box
+          var temp = (200 - ($('.upload_class p').css("line-height").replace(/[^-\d\.]/g, '') * $('.upload_class p').length)) / 2;
+          $('.upload_class').css({
+            "padding-top": temp,
+            "padding-bottom": temp
+          });
+          //fill dashed box with file input
+          $("input").css("height", $(".box").css("height"));
+        }
       } else if(files.length > 10) fade_in("alert-danger", "Error!", " Only 10 files can be uploaded at once.");
     });
-    //if(files !== null && files[0] !== undefined) {
   });
   //Add event listener to both buttons
   document.getElementById("upload_button").addEventListener("click", function() {
     $("#message").empty();
-    get_filename(function(files) {
-      for(var i = 0; i < files.length; i++) {
-        hash_file(files[i], function(filename, hash) {
-          verify(hash, function(resultObj) {
-            if(resultObj !== null && resultObj.block_number > 0) {
-              fade_in("alert-danger", "Error!", " <br> " + filename + " was already uploaded on <br>" + resultObj.timestamp);
-              console.log(filename + " already exists at block #" + resultObj.block_number);
-            } else {
-              upload_to_blockchain(hash, function(tx) {
-                fade_in("alert-success", "Success! ", files[i].name + " has been uploaded.");
-                console.log(files[i].name + " uploaded with transaction ID: " + tx);
-              });
-            }
-          });
-        })
-      }
-    })
+    if (file_array.length === 0) fade_in("alert-danger", "Error!", " Please select a file first.");
+    else{
+      pull_up(function(){
+        for(var i = 0; i < file_array.length; i++) {
+          hash_file(file_array[i], function(filename, hash) {
+            verify(hash, function(resultObj) {
+              if(resultObj !== null && resultObj.block_number > 0) {
+                fade_in("alert-danger", "Error!", " <br> " + filename + " was already uploaded on <br>" + resultObj.timestamp);
+                console.log(filename + " already exists at block #" + resultObj.block_number);
+              } else {
+                upload_to_blockchain(hash, function(tx) {
+                  fade_in("alert-success", "Success! ", filename + " has been uploaded.");
+                  console.log(filename + " uploaded with transaction ID: " + tx);
+                });
+              }
+            });
+          })
+        }
+      });
+    }
   });
   document.getElementById("find_button").addEventListener("click", function() {
     $("#message").empty();
-    get_filename(function(files) {
-      for(var i = 0; i < files.length; i++) {
-        hash_file(files[i], function(filename, hash) {
-          verify(hash, function(resultObj) {
-            if(resultObj !== null && resultObj.block_number > 0) {
-              fade_in("alert-success", "Valid! ", " <br>" + filename + " was uploaded on <br>" + resultObj.timestamp);
-              console.log(filename + " found at block #" + resultObj.block_number);
-            } else {
-              fade_in("alert-danger", "Invalid! ", filename + " cannot be verified.");
-              console.log(filename + " was not found in the blockchain.");
-            }
+
+    if (file_array.length === 0) fade_in("alert-danger", "Error!", " Please select a file first.");
+    else{
+      pull_up(function(){
+        for(var i = 0; i < file_array.length; i++) {
+          hash_file(file_array[i], function(filename, hash) {
+            verify(hash, function(resultObj) {
+              if(resultObj !== null && resultObj.block_number > 0) {
+                fade_in("alert-success", "Valid! ", " <br>" + filename + " was uploaded on <br>" + resultObj.timestamp);
+                console.log(filename + " found at block #" + resultObj.block_number);
+              } else {
+                fade_in("alert-danger", "Invalid! ", filename + " cannot be verified.");
+                console.log(filename + " was not found in the blockchain.");
+              }
+            });
           });
-        });
-      }
-    });
+        }
+      });
+    }
   });
   //if metamask isn't installed
   if (typeof Web3 == 'undefined'){
@@ -130,17 +133,17 @@ $(document).ready(function() {
     getAccount().then(temp_acc => {
       acc = temp_acc;
       $("#upload_button").prop('disabled', false);
-      $('#alert_message').remove();
+      $('#message').empty();
       fade_in("alert-info", "Connected!", " Account: <br>" + acc);
     });
 
     setTimeout(function(){
       if (acc === null){
         $("#upload_button").prop('disabled', true);
-        $('#alert_message').remove();
+        $('#message').empty();
         fade_in("alert-warning", "Warning!", " Account is locked. Upload access is disabled.");
       }
-    }, 50);
+    }, 500);
 
   }
 });
@@ -182,19 +185,23 @@ async function getAccount() {
   });
   return accounts[0];
 }
-
 function fade_in(special_class, message1, message2) {
   $("#message").fadeOut("fast", function() {
     $("#message").append("<div class='alert " + special_class + "' id=alert_message>" + "<strong>" + message1 + "</strong>" + message2 + "</div>");
     $("#message").fadeIn("slow");
   });
 }
-
 function get_filename(callback) {
+  file_array = [];
   var fileInput = document.getElementById('file_input');
   if(fileInput.files.length === 0) {
     $("#alert_message").remove();
     fade_in("alert-danger", "Error!", " Please select a file first.");
   }
   else callback(fileInput.files);
+}
+function pull_up(callback){
+  $('h1').animate({top: "15%"});
+  $('.upload').animate({top: "40%"});
+  callback();
 }
