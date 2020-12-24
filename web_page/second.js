@@ -39,25 +39,6 @@ $(document).ready(function() {
     "stateMutability": "view",
     "type": "function"
   }];
-  //if metamask isn't installed
-  if (typeof Web3 == 'undefined'){
-    $("#upload_button").prop('disabled', true);
-    $('#alert_message').remove();
-    fade_in("alert-warning", "Warning!", " No account detected. Upload access is disabled.");
-  }
-  else{
-    //creating an instance of the contract
-    const web3 = new Web3("http://localhost:7545");
-    contract = new web3.eth.Contract(abi, address);
-    getAccount().then(temp_acc => {
-      if(temp_acc !== null) {
-        acc = temp_acc;
-        $("#upload_button").prop('disabled', false);
-        $('#alert_message').remove();
-        fade_in("alert-info", "Connected!", " Account: <br>" + acc);
-      }
-    });
-  }
   //After file upload, but before any button is pressed
   $('input').change(function() {
     get_filename(function(files) {
@@ -137,6 +118,31 @@ $(document).ready(function() {
       }
     });
   });
+  //if metamask isn't installed
+  if (typeof Web3 == 'undefined'){
+    $('#upload_button').remove();
+    $('.right_button').css("margin-left", "0%");
+  }
+  else{
+    //creating an instance of the contract
+    const web3 = new Web3("http://localhost:7545");
+    contract = new web3.eth.Contract(abi, address);
+    getAccount().then(temp_acc => {
+      acc = temp_acc;
+      $("#upload_button").prop('disabled', false);
+      $('#alert_message').remove();
+      fade_in("alert-info", "Connected!", " Account: <br>" + acc);
+    });
+
+    setTimeout(function(){
+      if (acc === null){
+        $("#upload_button").prop('disabled', true);
+        $('#alert_message').remove();
+        fade_in("alert-warning", "Warning!", " Account is locked. Upload access is disabled.");
+      }
+    }, 50);
+
+  }
 });
 //hash the input file
 function hash_file(file, callback) {
