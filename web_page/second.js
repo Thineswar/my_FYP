@@ -1,5 +1,4 @@
 /*jshint esversion: 6 */
-//generate only 1 success message
 var contract = null;
 var address = "0x6D97310b646F9ADCfcbC4596f5a993857dC6Eb2D"; //contract address
 var acc = null;
@@ -81,21 +80,28 @@ $(document).ready(function() {
     if (file_array.length === 0) fade_in("alert-danger", "Error!", " Please select a file first.");
     else{
       pull_up(function(){
+        var success_count = 0, failed = [], failed_timestamp = [];
         for(var i = 0; i < file_array.length; i++) {
           hash_file(file_array[i], function(filename, hash) {
             verify(hash, function(resultObj) {
               if(resultObj !== null && resultObj.block_number > 0) {
-                fade_in("alert-danger", "Error!", " <br> " + filename + " was already uploaded on <br>" + resultObj.timestamp);
+                failed.push(filename);
+                failed_timestamp.push(resultObj.timestamp);
                 console.log(filename + " already exists at block #" + resultObj.block_number);
               } else {
                 upload_to_blockchain(hash, function(tx) {
-                  fade_in("alert-success", "Success! ", filename + " has been uploaded.");
+                  success_count++;
                   console.log(filename + " uploaded with transaction ID: " + tx);
                 });
               }
             });
           })
         }
+
+        fade_in("alert-success", "Success! ", success_count + " files have been uploaded.");
+
+        for (int i=0; i<failed.length; i++)
+          fade_in("alert-danger", "Error!", " <br> " + failed[i] + "<br>was already uploaded on<br>" + failed_timestamp[i]);
       });
     }
   });
@@ -105,19 +111,25 @@ $(document).ready(function() {
     if (file_array.length === 0) fade_in("alert-danger", "Error!", " Please select a file first.");
     else{
       pull_up(function(){
+        var success_count = 0;
+        var failed = [];
         for(var i = 0; i < file_array.length; i++) {
           hash_file(file_array[i], function(filename, hash) {
             verify(hash, function(resultObj) {
               if(resultObj !== null && resultObj.block_number > 0) {
-                fade_in("alert-success", "Valid! ", " <br>" + filename + " was uploaded on <br>" + resultObj.timestamp);
+                success_count++;
                 console.log(filename + " found at block #" + resultObj.block_number);
               } else {
-                fade_in("alert-danger", "Invalid! ", filename + " cannot be verified.");
+                failed.push(filename);
                 console.log(filename + " was not found in the blockchain.");
               }
             });
           });
         }
+
+        fade_in("alert-success", "Valid! ", success_count + " certificates are valid.");
+        for (int i=0; i<failed.length; i++)
+          fade_in("alert-danger", "Invalid! ", failed[i] + " cannot be verified.");
       });
     }
   });
