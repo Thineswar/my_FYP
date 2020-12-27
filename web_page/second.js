@@ -63,16 +63,25 @@ $(document).ready(function() {
 		});
 		if($('.upload_class').is(':empty')) {
 			//not even one pdf file was selected
-			$('.upload_class').append("<p>Click here to choose file <br> (.pdf only)</p>");
+			pull_down(function() {
+				$('.upload_class').append("<p>Click here to choose file <br> (.pdf only)</p>");
+				$('.upload_class').animate({
+					'padding-top': 68.5,
+					'padding-bottom': 68.5
+				});
+			});
 		} else {
 			//change top and bottom paddings of text inside dashed box
 			var temp = (200 - ($('.upload_class p').css("line-height").replace(/[^-\d\.]/g, '') * $('.upload_class p').length)) / 2;
-			$('.upload_class').css({
-				"padding-top": temp,
-				"padding-bottom": temp
+			if(temp < 40) temp = 40;
+			$('.upload_class').animate({
+				'padding-top': temp,
+				'padding-bottom': temp
 			});
 			//fill dashed box with file input
-			$("input").css("height", $(".box").css("height"));
+			setTimeout(function() {
+				$("#file_input").css("height", $(".box").css("height"));
+			}, 500);
 		}
 	});
 	//Add event listener to both buttons
@@ -81,46 +90,49 @@ $(document).ready(function() {
 		failed = [];
 		failed_timestamp = [];
 		$("#message").empty();
-
-		function upload(current_file) {
+		function upload(current_file, callback) {
 			hash_file(current_file, function(filename, hash) {
 				verify(hash, function(resultObj) {
 					if(resultObj !== null && resultObj.block_number > 0) {
 						failed.push(filename);
 						failed_timestamp.push(resultObj.timestamp);
-						alert("First: " + failed.length);
 						console.log(filename + " already exists at block #" + resultObj.block_number);
+						callback(filename);
 					} else {
 						upload_to_blockchain(hash, function(tx) {
-							if(file_array.length === 1) fade_in("alert-success", "Success! ", filename + " has been uploaded.");
-							else {
+							if(file_array.length === 1) 
+								fade_in("alert-success", "Success! ", filename + " has been uploaded.");
+							else
 								success_count++;
-							}
 							console.log(filename + " uploaded with transaction ID: " + tx);
+							callback(filename);
 						});
 					}
+					
 				});
 			});
 		}
 
 		function iterate(callback) {
 			var i;
-			for(i = 0; i < file_array.length; i++) {
-				upload(file_array[i]);
-			}
-			callback();
+			pull_up(function() {
+				for(i = 0; i < file_array.length; i++) {
+					upload(file_array[i], callback);
+				}
+			});
 		}
-
 		if(file_array.length === 0) fade_in("alert-danger", "Error!", " Please select a file first.");
 		else {
-			iterate(function() {
-				if(success_count > 0) {
-					fade_in("alert-success", "Success! ", success_count + " files have been uploaded.");
-				}
-				alert("Second: " + failed.length);
-				var i;
-				for(i = 0; i < failed.length; i++) {
-					fade_in("alert-danger", "Error!", " <br> " + failed[i] + "<br> was already uploaded on <br>" + failed_timestamp[i]);
+			iterate(function(last_file) {
+				alert("Successful: " + success_count + "; Failed: " + failed.length);
+				if (success_count + failed.length === file_array.length){
+					if(success_count > 0) {
+						fade_in("alert-success", "Success! ", success_count + " files have been uploaded.");
+					}
+					var i;
+					for(i = 0; i < failed.length; i++) {
+						fade_in("alert-danger", "Error!", " <br> " + failed[i] + "<br> was already uploaded on <br>" + failed_timestamp[i]);
+					}
 				}
 			});
 		}
@@ -130,25 +142,46 @@ $(document).ready(function() {
 		failed = [];
 		failed_timestamp = [];
 		$("#message").empty();
+
+		function verify_all(current_file, callback) {
+			hash_file(current_file, function(filename, hash) {
+				verify(hash, function(resultObj) {
+					if(resultObj !== null && resultObj.block_number > 0) {
+						if (file_array.length === 1)
+							fade_in("alert-success", "Valid! ", filename + " is legitimate.");
+						else
+							success_count++;
+						console.log(filename + " found at block #" + resultObj.block_number);
+						callback(filename);
+					} else {
+						failed.push(filename);
+						console.log(filename + " was not found in the blockchain.");
+						callback(filename);
+					}
+				});
+			});
+		}
+
+		function iterate(callback) {
+			var i;
+			pull_up(function() {
+				for(i = 0; i < file_array.length; i++) {
+					verify_all(file_array[i], callback);
+				}
+			});
+		}
 		if(file_array.length === 0) fade_in("alert-danger", "Error!", " Please select a file first.");
 		else {
-			pull_up(function() {
-				var i;
-				for(i = 0; i < file_array.length; i++) {
-					hash_file(file_array[i], function(filename, hash) {
-						verify(hash, function(resultObj) {
-							if(resultObj !== null && resultObj.block_number > 0) {
-								success_count++;
-								console.log(filename + " found at block #" + resultObj.block_number);
-							} else {
-								failed.push(filename);
-								console.log(filename + " was not found in the blockchain.");
-							}
-						});
-					});
+			iterate(function(last_file) {
+				if (success_count + failed.length === file_array.length){
+					if(success_count > 0) {
+						if (success_count === file_array.length)
+							fade_in("alert-success", "Valid! ", " All " + success_count + " certificates are legitimate.");
+						else
+							fade_in("alert-success", "Valid! ", success_count + " of " + file_array.length + " certificates are legitimate.");
+					}
+					for(var i = 0; i < failed.length; i++) fade_in("alert-danger", "Invalid! ", failed[i] + " cannot be verified.");
 				}
-				if(success_count > 0) fade_in("alert-success", "Valid! ", success_count + " certificates are valid.");
-				for(i = 0; i < failed.length; i++) fade_in("alert-danger", "Invalid! ", failed[i] + " cannot be verified.");
 			});
 		}
 	});
@@ -235,6 +268,16 @@ function pull_up(callback) {
 	});
 	$('.upload').animate({
 		top: "40%"
+	});
+	callback();
+}
+
+function pull_down(callback) {
+	$('h1').animate({
+		top: "20%"
+	});
+	$('.upload').animate({
+		top: "50%"
 	});
 	callback();
 }
