@@ -3,9 +3,6 @@ var contract = null;
 var address = "0x6D97310b646F9ADCfcbC4596f5a993857dC6Eb2D"; //contract address
 var acc = null;
 var file_array = [];
-var success_count = 0,
-	failed = [],
-	failed_timestamp = [];
 $(document).ready(function() {
 	var abi = [{
 		"inputs": [],
@@ -45,7 +42,7 @@ $(document).ready(function() {
 	$('input').change(function() {
 		$('.upload_class').empty();
 		$("#message").fadeOut("slow", function() {
-			$("#message").empty();
+			$(this).empty();
 		});
 		get_filename(function(files) {
 			if(files.length <= 10) {
@@ -64,8 +61,8 @@ $(document).ready(function() {
 		if($('.upload_class').is(':empty')) {
 			//not even one pdf file was selected
 			pull_down(function() {
-				$('.upload_class').append("<p>Click here to choose file <br> (.pdf only)</p>");
-				$('.upload_class').animate({
+				$(this).append("<p>Click here to choose file <br> (.pdf only)</p>");
+				$(this).animate({
 					'padding-top': 68.5,
 					'padding-bottom': 68.5
 				});
@@ -82,14 +79,16 @@ $(document).ready(function() {
 			setTimeout(function() {
 				$("#file_input").css("height", $(".box").css("height"));
 			}, 500);
+			//enable both buttons
+			//$("#find_button, #upload_button").prop('disabled',false);
 		}
 	});
-	//Add event listener to both buttons
-	document.getElementById("upload_button").addEventListener("click", function() {
-		success_count = 0;
-		failed = [];
-		failed_timestamp = [];
+	$('#upload_button').on('click', function() {
+	//document.getElementById("upload_button").addEventListener("click", function() {
+		var success_count = 0, failed = [], failed_timestamp = [];
+		$(this).prop('disabled',true);
 		$("#message").empty();
+
 		function upload(current_file, callback) {
 			hash_file(current_file, function(filename, hash) {
 				verify(hash, function(resultObj) {
@@ -100,90 +99,81 @@ $(document).ready(function() {
 						callback(filename);
 					} else {
 						upload_to_blockchain(hash, function(tx) {
-							if(file_array.length === 1) 
-								fade_in("alert-success", "Success! ", filename + " has been uploaded.");
-							else
-								success_count++;
+							if(file_array.length === 1) fade_in("alert-success", "Success! ", filename + " has been uploaded.");
+							else success_count++;
 							console.log(filename + " uploaded with transaction ID: " + tx);
 							callback(filename);
 						});
 					}
-					
 				});
 			});
 		}
 
 		function iterate(callback) {
-			var i;
 			pull_up(function() {
-				for(i = 0; i < file_array.length; i++) {
-					upload(file_array[i], callback);
-				}
+				for(var i = 0; i < file_array.length; i++) upload(file_array[i], callback);
 			});
 		}
 		if(file_array.length === 0) fade_in("alert-danger", "Error!", " Please select a file first.");
 		else {
-			iterate(function(last_file) {
-				alert("Successful: " + success_count + "; Failed: " + failed.length);
-				if (success_count + failed.length === file_array.length){
-					if(success_count > 0) {
-						fade_in("alert-success", "Success! ", success_count + " files have been uploaded.");
-					}
-					var i;
-					for(i = 0; i < failed.length; i++) {
-						fade_in("alert-danger", "Error!", " <br> " + failed[i] + "<br> was already uploaded on <br>" + failed_timestamp[i]);
-					}
+			iterate(function() {
+				if(success_count + failed.length === file_array.length) {
+					if(success_count > 0) fade_in("alert-success", "Success! ", success_count + " files have been uploaded.");
+					for(var i = 0; i < failed.length; i++) fade_in("alert-danger", "Error!", " <br> " + failed[i] + "<br> was already uploaded on <br>" + failed_timestamp[i]);
 				}
 			});
 		}
+		setTimeout(function() {
+			$("#upload_button").prop('disabled',false);
+		}, 500);
 	});
-	document.getElementById("find_button").addEventListener("click", function() {
-		success_count = 0;
-		failed = [];
-		failed_timestamp = [];
+	$('#find_button').on('click', function() {
+	//document.getElementById("find_button").addEventListener("click", function() {
+		var success_count = 0, failed = [], failed_timestamp = [];
+		$(this).prop('disabled',true);
 		$("#message").empty();
 
 		function verify_all(current_file, callback) {
 			hash_file(current_file, function(filename, hash) {
 				verify(hash, function(resultObj) {
 					if(resultObj !== null && resultObj.block_number > 0) {
-						if (file_array.length === 1)
-							fade_in("alert-success", "Valid! ", filename + " is legitimate.");
-						else
-							success_count++;
+						if(file_array.length === 1) fade_in("alert-success", "Valid! ", filename + " is legitimate.");
+						else success_count++;
 						console.log(filename + " found at block #" + resultObj.block_number);
-						callback(filename);
+						//callback();
 					} else {
 						failed.push(filename);
 						console.log(filename + " was not found in the blockchain.");
-						callback(filename);
+						//callback();
 					}
+					callback();
 				});
 			});
 		}
 
 		function iterate(callback) {
-			var i;
 			pull_up(function() {
-				for(i = 0; i < file_array.length; i++) {
+				for(var i = 0; i < file_array.length; i++) {
 					verify_all(file_array[i], callback);
 				}
 			});
 		}
 		if(file_array.length === 0) fade_in("alert-danger", "Error!", " Please select a file first.");
 		else {
-			iterate(function(last_file) {
-				if (success_count + failed.length === file_array.length){
+			iterate(function() {
+				if(success_count + failed.length === file_array.length) {
 					if(success_count > 0) {
-						if (success_count === file_array.length)
-							fade_in("alert-success", "Valid! ", " All " + success_count + " certificates are legitimate.");
-						else
-							fade_in("alert-success", "Valid! ", success_count + " of " + file_array.length + " certificates are legitimate.");
+						if(success_count === file_array.length) fade_in("alert-success", "Valid! ", " All " + success_count + " certificates are legitimate.");
+						else fade_in("alert-success", "Valid! ", success_count + " of " + file_array.length + " certificates are legitimate.");
 					}
 					for(var i = 0; i < failed.length; i++) fade_in("alert-danger", "Invalid! ", failed[i] + " cannot be verified.");
 				}
 			});
 		}
+
+		setTimeout(function() {
+			$("#find_button").prop('disabled',false);
+		}, 500);
 	});
 	//if metamask isn't installed
 	if(typeof Web3 == 'undefined') {
@@ -208,7 +198,7 @@ $(document).ready(function() {
 		}, 500);
 	}
 });
-//hash the input file
+
 function hash_file(file, callback) {
 	var fr = new FileReader();
 	fr.readAsArrayBuffer(file);
@@ -218,7 +208,7 @@ function hash_file(file, callback) {
 		callback(file.name, hash);
 	};
 }
-//sends the hash to the blockchain
+//calls function in smart contract
 function upload_to_blockchain(hash, callback) {
 	contract.methods.upload(hash).send({
 		from: acc
@@ -227,7 +217,7 @@ function upload_to_blockchain(hash, callback) {
 		else callback(tx);
 	});
 }
-//looks up the hash on the blockchain
+//calls function in smart contract
 function verify(hash, callback) {
 	contract.methods.verify(hash).call(function(error, result) {
 		if(!error) {
@@ -249,8 +239,8 @@ async function getAccount() {
 
 function fade_in(special_class, message1, message2) {
 	$("#message").fadeOut("fast", function() {
-		$("#message").append("<div class='alert " + special_class + "'> <b>" + message1 + "</b>" + message2 + "</div>");
-		$("#message").fadeIn("fast");
+		$(this).append("<div class='alert " + special_class + "'> <b>" + message1 + "</b>" + message2 + "</div>");
+		$(this).fadeIn("fast");
 	});
 }
 
