@@ -88,7 +88,7 @@ $(document).ready(function() {
 					if(resultObj !== null && resultObj.block_number > 0) {
 						failed.push(filename);
 						failed_timestamp.push(resultObj.timestamp);
-						alert("Here " + failed.length);
+						alert("First: " + failed.length);
 						console.log(filename + " already exists at block #" + resultObj.block_number);
 					} else {
 						upload_to_blockchain(hash, function(tx) {
@@ -110,13 +110,14 @@ $(document).ready(function() {
 			}
 			callback();
 		}
+
 		if(file_array.length === 0) fade_in("alert-danger", "Error!", " Please select a file first.");
 		else {
 			iterate(function() {
 				if(success_count > 0) {
 					fade_in("alert-success", "Success! ", success_count + " files have been uploaded.");
 				}
-				alert(failed.length);
+				alert("Second: " + failed.length);
 				var i;
 				for(i = 0; i < failed.length; i++) {
 					fade_in("alert-danger", "Error!", " <br> " + failed[i] + "<br> was already uploaded on <br>" + failed_timestamp[i]);
@@ -223,10 +224,9 @@ function fade_in(special_class, message1, message2) {
 function get_filename(callback) {
 	file_array = [];
 	var fileInput = document.getElementById('file_input');
-	if(fileInput.files.length === 0) {
-		$("#message").empty();
-		fade_in("alert-danger", "Error!", " Please select a file first.");
-	} else callback(fileInput.files);
+	if(fileInput.files.length !== 0) {
+		callback(fileInput.files);
+	}
 }
 
 function pull_up(callback) {
