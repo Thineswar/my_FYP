@@ -84,7 +84,6 @@ $(document).ready(function() {
 		}
 	});
 	$('#upload_button').on('click', function() {
-	//document.getElementById("upload_button").addEventListener("click", function() {
 		var success_count = 0, failed = [], failed_timestamp = [];
 		$(this).prop('disabled',true);
 		$("#message").empty();
@@ -96,13 +95,13 @@ $(document).ready(function() {
 						failed.push(filename);
 						failed_timestamp.push(resultObj.timestamp);
 						console.log(filename + " already exists at block #" + resultObj.block_number);
-						callback(filename);
+						callback();
 					} else {
 						upload_to_blockchain(hash, function(tx) {
 							if(file_array.length === 1) fade_in("alert-success", "Success! ", filename + " has been uploaded.");
 							else success_count++;
 							console.log(filename + " uploaded with transaction ID: " + tx);
-							callback(filename);
+							callback();
 						});
 					}
 				});
@@ -140,13 +139,12 @@ $(document).ready(function() {
 						if(file_array.length === 1) fade_in("alert-success", "Valid! ", filename + " is legitimate.");
 						else success_count++;
 						console.log(filename + " found at block #" + resultObj.block_number);
-						//callback();
+						callback();
 					} else {
 						failed.push(filename);
 						console.log(filename + " was not found in the blockchain.");
-						//callback();
+						callback();
 					}
-					callback();
 				});
 			});
 		}
