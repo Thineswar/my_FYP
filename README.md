@@ -63,3 +63,11 @@ Firstly, a file should be selected to upload. Only PDFs are allowed, and up to t
 1. In a web-browser, enter the url: _localhost:8080_
 1. Upload and verify documents.
 
+### Testing
+
+1. To test the smart contracts, first cd into the project folder.
+1. Then setup a development network `truffle development`
+1. Finally, run the test script with `test`
+1. Note: this test will only work the first time it is run. For subsequent runs, alter the hash values in \test\test.js. All hash values need to be identical.
+1. The first test tries to find the given hash value in the network. It will return a null value.
+1. The second block uploads the given hash value, before the previous test is run again. This time, it will return a non-null value.
