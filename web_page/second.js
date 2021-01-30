@@ -49,6 +49,7 @@ $(document).ready(function () {
       type: "function",
     },
   ];
+
   //After file upload, but before any button is pressed
   $("input").change(function () {
     $(".upload_class").empty();
@@ -80,8 +81,8 @@ $(document).ready(function () {
     if ($(".upload_class").is(":empty")) {
       //not even one pdf file was selected
       pull_down(function () {
-        $(this).append("<p>Click here to choose file <br> (.pdf only)</p>");
-        $(this).animate({
+        $(".upload_class").append("<p>Click here to choose file <br> (.pdf only)</p>");
+        $(".upload_class").animate({
           "padding-top": 68.5,
           "padding-bottom": 68.5,
         });
