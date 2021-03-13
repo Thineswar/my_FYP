@@ -1,6 +1,6 @@
 # my_FYP
 
-Digital Certificate Verification System Utilizing Permissioned Blockchain
+E-Certificate Verification System Using Permissioned Blockchain
 
 A certificate verification system using blockchain is nothing new. However, most rely on public, permissionless blockchain networks where the processing time and transaction fee vary wildly. With a permissioned blockchain network, processing time is more consistent, and it allows for the system owner to set the transaction fee to be zero, thereby making the system more feasible.
 
